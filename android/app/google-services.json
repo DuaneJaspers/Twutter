@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "707336206242",
+    "firebase_url": "https://twutter-1aea8.firebaseio.com",
+    "project_id": "twutter-1aea8",
+    "storage_bucket": "twutter-1aea8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707336206242:android:96f121d51fa7ab650724fb",
+        "android_client_info": {
+          "package_name": "com.duanejaspers.twutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "707336206242-an82dqgkevbgjgr84nbfcter2jb7ccnp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ-WvYD9iHUqVJc14jET2hfNjbCKYFyi8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "707336206242-an82dqgkevbgjgr84nbfcter2jb7ccnp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

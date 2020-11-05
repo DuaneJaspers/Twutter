@@ -13,6 +13,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _success;
   String _userEmail;
+  String _error;
 
   FirebaseAuth _auth = FirebaseAuth.instance;
   @override
@@ -51,11 +52,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 Container(
                   alignment: Alignment.center,
-                  child: Text(_success == null
-                      ? ''
-                      : (_success
-                          ? 'Succesfully registered  $_userEmail'
-                          : 'Registration Failed')),
+                  child: Text(
+                    _error == null ? '' : '$_error',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -92,11 +92,27 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _register() async {
-    final User user = (await _auth.createUserWithEmailAndPassword(
-      email: _emailController.text,
-      password: _passwordController.text,
-    ))
-        .user;
+    User user;
+    String error;
+    try {
+      UserCredential userCredential =
+          (await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      ));
+      user = userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        // TODO : display error
+        error = ('The password provided is too weak');
+      } else if (e.code == 'email-already-in-use') {
+        // TODO : display error
+        error = ('the account already exists for that email.');
+      }
+    } catch (e) {
+      error = ('different error : $e');
+    }
+
     if (user != null) {
       setState(() {
         _success = true;
@@ -104,9 +120,11 @@ class _RegisterPageState extends State<RegisterPage> {
       });
     } else {
       setState(() {
-        _success = true;
+        _success = false;
+        _error = error;
       });
     }
+    Navigator.pop(context);
   }
 
   @override

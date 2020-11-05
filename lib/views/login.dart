@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:twutter/widgets/formsFields/email_field.dart';
 import 'package:twutter/widgets/formsFields/password_field.dart';
 
@@ -91,6 +90,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
+        //TODO: show error
         print('No user found for that email');
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user');

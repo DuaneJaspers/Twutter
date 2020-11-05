@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/API.dart';
 import 'package:twutter/models/post.dart';
@@ -13,15 +14,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  User _user;
   void _pushPost() {
     Navigator.pushNamed(context, '/register');
   }
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth.instance.authStateChanges().listen((User user) {
+      setState(() {
+        _user = user;
+      });
+    });
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title + ' ' + _user.email),
       ),
       body: _buildBody(context),
       floatingActionButton: FloatingActionButton(

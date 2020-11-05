@@ -27,6 +27,7 @@ class _PostPageState extends State<PostPage> {
 
   void _savePost() {
     List<String> tags = extractTags(postContent);
+    print(user);
     Post post = Post(postContent, tags, user);
     addPost(post);
     Navigator.pop(context);

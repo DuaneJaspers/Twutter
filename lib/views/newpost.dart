@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/post.dart';
+import '../API.dart';
 
 class PostPage extends StatefulWidget {
   PostPage({Key key, this.title}) : super(key: key);
@@ -20,6 +22,13 @@ class _PostPageState extends State<PostPage> {
     });
   }
 
+  void _savePost() {
+    List<String> tags;
+    Post post = Post(postContent, tags);
+    addPost(post);
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +37,8 @@ class _PostPageState extends State<PostPage> {
           actions: <Widget>[
             Padding(
                 padding: EdgeInsets.only(right: 20),
-                child: RaisedButton(onPressed: () {}, child: Text('Make Twut')))
+                child: RaisedButton(
+                    onPressed: _savePost, child: Text('Make Twut')))
           ],
         ),
         body: Column(

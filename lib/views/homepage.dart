@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:twutter/API.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -11,6 +12,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   void _pushPost() {
+    getPosts();
     Navigator.pushNamed(context, '/post');
   }
 
@@ -26,10 +28,6 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             Text(
               'This is the homepage placeholder',
-            ),
-            Text(
-              'HAHAHA',
-              style: Theme.of(context).textTheme.headline4,
             ),
           ],
         ),

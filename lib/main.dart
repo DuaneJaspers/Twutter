@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import './views/post.dart';
+import 'views/newpost.dart';
 import './views/homepage.dart';
 
 void main() async {

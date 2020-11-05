@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:twutter/helpers/util.dart';
 import '../models/post.dart';
 import '../API.dart';
 
@@ -23,7 +24,7 @@ class _PostPageState extends State<PostPage> {
   }
 
   void _savePost() {
-    List<String> tags;
+    List<String> tags = extractTags(postContent);
     Post post = Post(postContent, tags);
     addPost(post);
     Navigator.pop(context);
@@ -37,13 +38,18 @@ class _PostPageState extends State<PostPage> {
           actions: <Widget>[
             Padding(
                 padding: EdgeInsets.only(right: 20),
-                child: RaisedButton(
-                    onPressed: _savePost, child: Text('Make Twut')))
+                child:
+                    // TODO: style button
+                    RaisedButton(
+                        onPressed: _savePost, child: Text('Make Twut')))
           ],
         ),
         body: Column(
           children: <Widget>[
+            // TODO : display name and profile picture
             Text('$_counter = $postContent'),
+            // TODO: move to top
+            // TODO: add _counter limit
             TextField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,

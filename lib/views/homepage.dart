@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/API.dart';
+import 'package:twutter/models/post.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -12,8 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   void _pushPost() {
-    getPosts();
-    Navigator.pushNamed(context, '/post');
+    Navigator.pushNamed(context, '/register');
   }
 
   @override
@@ -22,20 +23,44 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'This is the homepage placeholder',
-            ),
-          ],
-        ),
-      ),
+      body: _buildBody(context),
       floatingActionButton: FloatingActionButton(
         onPressed: _pushPost,
         tooltip: 'new Post',
         child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return FutureBuilder<QuerySnapshot>(
+        future: posts.get(),
+        builder: (context, snapshot) {
+          return !snapshot.hasData
+              ? LinearProgressIndicator()
+              : _buildList(context, snapshot.data.docs);
+        });
+  }
+
+  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+    return ListView(
+      children: snapshot.map((data) => _buildRow(context, data)).toList(),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, DocumentSnapshot snapshot) {
+    final post = Post.fromSnapshot(snapshot);
+    return Padding(
+      key: ValueKey(post.reference),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        child: ListTile(
+          title: Text(post.content),
+        ),
       ),
     );
   }

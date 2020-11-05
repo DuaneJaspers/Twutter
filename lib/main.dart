@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:twutter/views/login.dart';
+import 'package:twutter/views/register.dart';
 import 'views/newpost.dart';
 import './views/homepage.dart';
 
@@ -27,6 +29,8 @@ class _TwutterAppState extends State<TwutterApp> {
       routes: {
         '/': (context) => HomePage(title: "Twutter Homepage"),
         '/post': (context) => PostPage(title: "new record"),
+        '/register': (context) => RegisterPage(),
+        '/login': (context) => LoginPage(),
       },
     );
   }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/helpers/util.dart';
 import '../models/post.dart';
@@ -15,6 +16,7 @@ class PostPage extends StatefulWidget {
 class _PostPageState extends State<PostPage> {
   int _counter = 0;
   String postContent;
+  User user = FirebaseAuth.instance.currentUser;
 
   void _changePost(String value) {
     setState(() {
@@ -25,7 +27,7 @@ class _PostPageState extends State<PostPage> {
 
   void _savePost() {
     List<String> tags = extractTags(postContent);
-    Post post = Post(postContent, tags);
+    Post post = Post(postContent, tags, user);
     addPost(post);
     Navigator.pop(context);
   }

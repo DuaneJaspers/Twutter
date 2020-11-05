@@ -1,8 +1,8 @@
-List<String> extractTags(String post) {
+List<String> extractTags(String postContent) {
   List<String> tags = [];
   RegExp exp = new RegExp(r"\B(\#[a-zA-Z]+\b)(?!;)");
 
-  Iterable<Match> matches = exp.allMatches(post);
+  Iterable<Match> matches = exp.allMatches(postContent);
   if (matches == null) {
     return null;
   }

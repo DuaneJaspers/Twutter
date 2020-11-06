@@ -28,9 +28,9 @@ class _PostPageState extends State<PostPage> {
   void _savePost() {
     List<String> tags = extractTags(postContent);
     print(user);
-    Post post = Post(postContent, tags, user);
+    Post post = Post(postContent, tags, user.uid);
     addPost(post);
-    Navigator.pop(context);
+    Navigator.pop(context, 'new twuut made!');
   }
 
   @override

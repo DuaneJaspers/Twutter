@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/widgets/formsFields/email_field.dart';
+import 'package:twutter/widgets/formsFields/password_field.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -28,16 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 EmailField(emailController: _emailController),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'password'),
-                  validator: (String value) {
-                    if (value.isEmpty) {
-                      return 'please enter a password';
-                    }
-                    return null;
-                  },
-                ),
+                PasswordField(passwordController: _passwordController),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   alignment: Alignment.center,
@@ -50,33 +42,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Text('Submit'),
                   ),
                 ),
-                Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    _error == null ? '' : '$_error',
-                    style: TextStyle(color: Colors.red),
+                if (_error != null)
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$_error',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  alignment: Alignment.center,
-                  child: RaisedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/post');
-                    },
-                    child: Text('New Post'),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  alignment: Alignment.center,
-                  child: RaisedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/post');
-                    },
-                    child: Text('New Post'),
-                  ),
-                ),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   alignment: Alignment.center,
@@ -103,10 +76,8 @@ class _RegisterPageState extends State<RegisterPage> {
       user = userCredential.user;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        // TODO : display error
         error = ('The password provided is too weak');
       } else if (e.code == 'email-already-in-use') {
-        // TODO : display error
         error = ('the account already exists for that email.');
       }
     } catch (e) {
@@ -124,7 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _error = error;
       });
     }
-    Navigator.pop(context);
+    Navigator.pop(context, 'Registration succesfull');
   }
 
   @override

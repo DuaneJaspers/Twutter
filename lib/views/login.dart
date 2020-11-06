@@ -12,8 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _success;
-  String _userEmail;
+  String _error;
   FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
@@ -47,18 +46,14 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
             ),
-            Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                _success == null
-                    ? ""
-                    : (_success
-                        ? 'succesfully signed in ' + _userEmail
-                        : 'Sign in failed'),
-                style: TextStyle(color: Colors.red),
+            if (_error != null)
+              Container(
+                alignment: Alignment.center,
+                child: Text(
+                  '$_error',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -73,30 +68,22 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signInWithEmailAndPassword() async {
+    String error;
     try {
       final User user = (await _auth.signInWithEmailAndPassword(
               email: _emailController.text, password: _passwordController.text))
           .user;
 
-      if (user != null) {
-        setState(() {
-          _success = true;
-          _userEmail = user.email;
-        });
-      } else {
-        setState(() {
-          _success = false;
-        });
-      }
+      Navigator.pop(context, "login succesful");
+      // Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        //TODO: show error
-        print('No user found for that email');
+        error = ('No user found for that email');
       } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user');
+        error = ('Wrong password provided for that user');
       }
       setState(() {
-        _success = false;
+        _error = error;
       });
     }
   }

@@ -5,28 +5,29 @@ class Post {
   final String content;
   final List<String> tags;
   final DocumentReference reference;
-  final List likes;
-  final DateTime date;
-  final User user;
+  final List<String> likes;
+  final Timestamp date;
+  final String uid;
 
-  Post(String postContent, List<String> postTags, User postUser,
+  Post(String postContent, List<String> postTags, String postUid,
       {this.reference})
       : assert(postContent != null),
         content = postContent,
-        likes = null,
-        date = DateTime.now(),
+        likes = [],
+        date = Timestamp.now(),
         tags = postTags,
-        user = postUser;
+        uid = postUid;
+  // user = postUser;
 
   Post.fromMap(Map<dynamic, dynamic> map, {this.reference})
       : assert(map['content'] != null),
         content = map['content'],
-        date = DateTime(map['date']),
-        likes = map['likes'],
-        tags = map['tags'].toString().isEmpty
-            ? List<String>.from(map['tags'])
-            : null,
-        user = null;
+        date = map['date'],
+        likes = List<String>.from(map['likes']),
+        tags = List<String>.from(map['tags']),
+        uid = map['uid'];
+
+  // user = null;
 
   Post.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data(), reference: snapshot.reference);

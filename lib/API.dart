@@ -21,7 +21,7 @@ Future<void> addPost(Post post) {
         'tags': post.tags,
         'likes': post.likes,
         'date': post.date,
-        'user': post.user,
+        'uid': post.uid,
       })
       .then((value) => print("post added"))
       .catchError((error) => print("Failed to add user: $error"));

@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/API.dart';
 import 'package:twutter/models/post.dart';
+import 'package:twutter/widgets/buttons/login_button.dart';
+import 'package:twutter/widgets/buttons/new_post_fab.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -15,8 +17,35 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   User _user;
-  void _pushPost() {
-    Navigator.pushNamed(context, '/register');
+  int _selectedIndex = 0;
+
+  Widget _changeTab(context, index) {
+    switch (index) {
+      case 0:
+        return _buildBody(context);
+        break;
+      case 1:
+        return _buildFollowing(context);
+        break;
+      case 2:
+        return _buildBody(context);
+        break;
+      default:
+        return _buildBody(context);
+    }
+  }
+
+  static const List<Widget> _tabOptions = <Widget>[
+    Text('page 1'),
+    Text('page 2'),
+    Text('page 3'),
+  ];
+
+  void _onItemTapped(int index) {
+    print(index);
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -27,15 +56,34 @@ class _HomePageState extends State<HomePage> {
       });
     });
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(padding: EdgeInsets.zero, children: <Widget>[
+          DrawerHeader(
+            child: Text(
+              'Menu',
+              textAlign: TextAlign.center,
+            ),
+            decoration: BoxDecoration(color: Colors.blue),
+          ),
+          LoginButton(),
+        ]),
+      ),
       appBar: AppBar(
         title: Text(widget.title + ' ' + _user.email),
+        actions: [],
       ),
-      body: _buildBody(context),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pushPost,
-        tooltip: 'new Post',
-        child: Icon(Icons.add),
-      ),
+      body: _changeTab(context, _selectedIndex),
+      floatingActionButton: NewPostFAB(),
+      bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.people), label: 'following'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'profile'),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.amber[800],
+          onTap: _onItemTapped),
     );
   }
 
@@ -67,8 +115,13 @@ class _HomePageState extends State<HomePage> {
         ),
         child: ListTile(
           title: Text(post.content),
+          subtitle: Text(post.date.toDate().toString()),
         ),
       ),
     );
+  }
+
+  Widget _buildFollowing(BuildContext context) {
+    return (Text('following page'));
   }
 }

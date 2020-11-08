@@ -1,10 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:twutter/API.dart';
-import 'package:twutter/models/post.dart';
-import 'package:twutter/widgets/buttons/login_button.dart';
-import 'package:twutter/widgets/buttons/new_post_fab.dart';
+import 'package:twutter/helpers/enum.dart';
+import 'package:twutter/widgets/twuutList.dart';
+
+import '../widgets/buttons/login_button.dart';
+import '../widgets/buttons/logout_button.dart';
+import '../widgets/buttons/new_post_fab.dart';
+import '../widgets/buttons/register_button.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -20,26 +22,19 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   Widget _changeTab(context, index) {
-    switch (index) {
-      case 0:
-        return _buildBody(context);
+    navTabsEnum tab = navTabsEnum.values[index];
+    // print(navTabsEnum.following);/
+    switch (tab) {
+      case navTabsEnum.homepage:
+        return TwuutList();
         break;
-      case 1:
+      case navTabsEnum.following:
         return _buildFollowing(context);
         break;
-      case 2:
-        return _buildBody(context);
-        break;
       default:
-        return _buildBody(context);
+        return TwuutList();
     }
   }
-
-  static const List<Widget> _tabOptions = <Widget>[
-    Text('page 1'),
-    Text('page 2'),
-    Text('page 3'),
-  ];
 
   void _onItemTapped(int index) {
     print(index);
@@ -59,68 +54,58 @@ class _HomePageState extends State<HomePage> {
       drawer: Drawer(
         child: ListView(padding: EdgeInsets.zero, children: <Widget>[
           DrawerHeader(
-            child: Text(
-              'Menu',
-              textAlign: TextAlign.center,
+            child: GestureDetector(
+              onTap: () {
+                print('hit');
+                Navigator.pushNamed(context, '/profile',
+                    arguments: FirebaseAuth.instance.currentUser.uid);
+              },
+              child: Column(children: <Widget>[
+                Text(
+                  _user != null ? '@${_user.displayName}' : '',
+                  textAlign: TextAlign.center,
+                ),
+              ]),
             ),
             decoration: BoxDecoration(color: Colors.blue),
           ),
-          LoginButton(),
+          (FirebaseAuth.instance.currentUser != null)
+              ? LogoutButton()
+              : Row(
+                  children: [LoginButton(), RegisterButton()],
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                ),
+          RaisedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile',
+                  arguments: FirebaseAuth.instance.currentUser.uid);
+            },
+            child: Text('Profile'),
+          )
         ]),
       ),
       appBar: AppBar(
-        title: Text(widget.title + ' ' + _user.email),
+        title: Text(widget.title),
         actions: [],
       ),
       body: _changeTab(context, _selectedIndex),
       floatingActionButton: NewPostFAB(),
       bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.blue,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.people), label: 'following'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'profile'),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.amber[800],
+          // TODO : use theme to set colors...
+          unselectedItemColor: Colors.white30,
+          selectedItemColor: Colors.white,
           onTap: _onItemTapped),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
-        future: posts.get(),
-        builder: (context, snapshot) {
-          return !snapshot.hasData
-              ? LinearProgressIndicator()
-              : _buildList(context, snapshot.data.docs);
-        });
-  }
-
-  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
-    return ListView(
-      children: snapshot.map((data) => _buildRow(context, data)).toList(),
-    );
-  }
-
-  Widget _buildRow(BuildContext context, DocumentSnapshot snapshot) {
-    final post = Post.fromSnapshot(snapshot);
-    return Padding(
-      key: ValueKey(post.reference),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        child: ListTile(
-          title: Text(post.content),
-          subtitle: Text(post.date.toDate().toString()),
-        ),
-      ),
-    );
-  }
-
+// TODO: move to own class
   Widget _buildFollowing(BuildContext context) {
     return (Text('following page'));
   }

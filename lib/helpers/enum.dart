@@ -1,0 +1,1 @@
+enum navTabsEnum { homepage, following }

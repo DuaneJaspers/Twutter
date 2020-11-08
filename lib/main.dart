@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:twutter/views/profile.dart';
 import 'views/login.dart';
 import 'package:twutter/views/register.dart';
 import 'views/newpost.dart';
@@ -32,6 +34,7 @@ class _TwutterAppState extends State<TwutterApp> {
         '/post': (context) => PostPage(title: "new record"),
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
+        '/profile': (context) => ProfilePage(),
         // TODO : forgot password
         // TODO : profile
         // TODO : own profile

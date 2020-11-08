@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:twutter/widgets/formsFields/displayname_field.dart';
 import 'package:twutter/widgets/formsFields/email_field.dart';
 import 'package:twutter/widgets/formsFields/password_field.dart';
 
@@ -11,9 +12,8 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _displayNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _success;
-  String _userEmail;
   String _error;
 
   FirebaseAuth _auth = FirebaseAuth.instance;
@@ -28,6 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                DisplayNameField(displayNameController: _displayNameController),
                 EmailField(emailController: _emailController),
                 PasswordField(passwordController: _passwordController),
                 Container(
@@ -74,6 +75,8 @@ class _RegisterPageState extends State<RegisterPage> {
         password: _passwordController.text,
       ));
       user = userCredential.user;
+      user.updateProfile(displayName: _displayNameController.text);
+      Navigator.pop(context, 'Registration succesfull');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         error = ('The password provided is too weak');
@@ -83,19 +86,11 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       error = ('different error : $e');
     }
-
-    if (user != null) {
+    if (error != null) {
       setState(() {
-        _success = true;
-        _userEmail = user.email;
-      });
-    } else {
-      setState(() {
-        _success = false;
         _error = error;
       });
     }
-    Navigator.pop(context, 'Registration succesfull');
   }
 
   @override

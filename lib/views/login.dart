@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
               email: _emailController.text, password: _passwordController.text))
           .user;
 
-      Navigator.pop(context, "login succesful");
+      Navigator.pop(context, "login successful");
       // Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

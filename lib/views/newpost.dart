@@ -25,10 +25,12 @@ class _PostPageState extends State<PostPage> {
     });
   }
 
-  void _savePost() {
+  void _savePost() async {
+    print(postContent);
     List<String> tags = extractTags(postContent);
     print(user);
-    Post post = Post(postContent, tags, user.uid);
+    List<String> likes;
+    Post post = Post(postContent, tags, likes, user.uid);
     addPost(post);
     Navigator.pop(context, 'new twuut made!');
   }

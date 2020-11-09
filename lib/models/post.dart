@@ -3,28 +3,29 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Post {
   final String content;
-  final List<String> tags;
+  final List<dynamic> tags;
   final DocumentReference reference;
-  final List<String> likes;
+  final List<dynamic> likes;
   final Timestamp date;
   final String uid;
 
-  Post(String postContent, List<String> postTags, String postUid,
+  Post(String postContent, List<dynamic> postTags, List<dynamic> postLikes,
+      String postUid,
       {this.reference})
       : assert(postContent != null),
         content = postContent,
-        likes = [],
+        likes = postLikes,
         date = Timestamp.now(),
-        tags = postTags,
+        tags = postTags.isEmpty ? null : postTags,
         uid = postUid;
   // user = postUser;
 
-  Post.fromMap(Map<dynamic, dynamic> map, {this.reference})
+  Post.fromMap(Map<String, dynamic> map, {this.reference})
       : assert(map['content'] != null),
         content = map['content'],
         date = map['date'],
-        likes = List<String>.from(map['likes']),
-        tags = List<String>.from(map['tags']),
+        likes = map['likes'],
+        tags = map['tags'],
         uid = map['uid'];
 
   // user = null;

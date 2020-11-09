@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:twutter/models/profile.dart';
 import 'package:twutter/widgets/formsFields/displayname_field.dart';
 import 'package:twutter/widgets/formsFields/email_field.dart';
 import 'package:twutter/widgets/formsFields/password_field.dart';
+import '../API.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -70,12 +72,19 @@ class _RegisterPageState extends State<RegisterPage> {
     String error;
     try {
       UserCredential userCredential =
-          (await _auth.createUserWithEmailAndPassword(
+          await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
-      ));
+      );
       user = userCredential.user;
       user.updateProfile(displayName: _displayNameController.text);
+
+      List<String> following;
+
+      Profile profile = Profile(
+          _displayNameController.text, user.photoURL, following, user.uid);
+      API.saveProfile(profile);
+
       Navigator.pop(context, 'Registration succesfull');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {

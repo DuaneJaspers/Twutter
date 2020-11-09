@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:twutter/views/profile.dart';
@@ -30,14 +29,11 @@ class _TwutterAppState extends State<TwutterApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => HomePage(title: "Twutter Homepage"),
-        // TODO : homepage/following/ownprofile???
         '/post': (context) => PostPage(title: "new record"),
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/profile': (context) => ProfilePage(),
         // TODO : forgot password
-        // TODO : profile
-        // TODO : own profile
       },
     );
   }

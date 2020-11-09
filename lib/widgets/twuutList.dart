@@ -13,8 +13,8 @@ class TwuutList extends StatefulWidget {
 
 // TODO make list lazy
 class _TwuutListState extends State<TwuutList> {
-  final initialData = posts.orderBy('date', descending: true).get();
-  var data = posts.orderBy('date', descending: true).get();
+  final initialData = API.posts.orderBy('date', descending: true).get();
+  var data = API.posts.orderBy('date', descending: true).get();
   var reload = false;
 
   @override

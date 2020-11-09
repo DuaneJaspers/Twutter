@@ -31,7 +31,7 @@ class _PostPageState extends State<PostPage> {
     print(user);
     List<String> likes;
     Post post = Post(postContent, tags, likes, user.uid);
-    addPost(post);
+    API.addPost(post);
     Navigator.pop(context, 'new twuut made!');
   }
 

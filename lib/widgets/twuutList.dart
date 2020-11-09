@@ -58,10 +58,10 @@ class _TwuutListState extends State<TwuutList> {
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(5.0),
         ),
-        child: ListTile(
-          title: Text(post.content),
-          subtitle: Text(post.date.toDate().toString()),
-        ),
+        child: Column(children: [
+          Text(post.content),
+          Text(post.date.toDate().toString()),
+        ]),
       ),
     );
   }

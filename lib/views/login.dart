@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:twutter/widgets/buttons/register_button.dart';
 import 'package:twutter/widgets/formsFields/email_field.dart';
 import 'package:twutter/widgets/formsFields/password_field.dart';
 
@@ -37,14 +38,19 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: RaisedButton(
-                child: Text("login"),
-                onPressed: () async {
-                  if (_formKey.currentState.validate()) {
-                    _signInWithEmailAndPassword();
-                  }
-                },
-              ),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    RaisedButton(
+                      child: Text("login"),
+                      onPressed: () async {
+                        if (_formKey.currentState.validate()) {
+                          _signInWithEmailAndPassword();
+                        }
+                      },
+                    ),
+                    RegisterButton()
+                  ]),
             ),
             if (_error != null)
               Container(
@@ -70,12 +76,11 @@ class _LoginPageState extends State<LoginPage> {
   void _signInWithEmailAndPassword() async {
     String error;
     try {
-      final User user = (await _auth.signInWithEmailAndPassword(
+      final User _ = (await _auth.signInWithEmailAndPassword(
               email: _emailController.text, password: _passwordController.text))
           .user;
 
       Navigator.pop(context, "login successful");
-      // Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         error = ('No user found for that email');

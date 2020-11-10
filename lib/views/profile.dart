@@ -28,7 +28,11 @@ class _ProfilePageState extends State<ProfilePage> {
       body: Column(
         children: [
           Text('$displayName'),
-          Expanded(child: SizedBox(child: TwuutList())),
+          Expanded(
+              child: SizedBox(
+                  child: TwuutList(
+            filters: [uid],
+          ))),
           // TwuutList(),
         ],
       ),

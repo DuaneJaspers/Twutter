@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/API.dart';
 import 'package:twutter/models/post.dart';
@@ -7,58 +6,68 @@ import 'package:twutter/models/profile.dart';
 import '../API.dart';
 
 class TwuutList extends StatefulWidget {
+  TwuutList({Key key, this.filters}) : super(key: key);
+  final List<String> filters;
   @override
   _TwuutListState createState() => _TwuutListState();
 }
 
-// TODO make list lazy
 class _TwuutListState extends State<TwuutList> {
-  final initialData = API.posts.orderBy('date', descending: true).get();
-  var data = API.posts.orderBy('date', descending: true).get();
-  var reload = false;
+  Stream<QuerySnapshot> data;
+  var initialData;
+
+  @override
+  void initState() {
+    super.initState();
+    var filters = widget.filters ?? [];
+    if (filters.isEmpty) {
+      initialData = API.posts.orderBy('date', descending: true);
+    } else {
+      initialData = API.posts
+          .where('uid', whereIn: filters)
+          .orderBy('date', descending: true);
+    }
+    data = initialData.snapshots();
+  }
+
+  void _fetchPosts() {
+    setState(() {
+      data = initialData.snapshots();
+    });
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _fetchPosts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return _buildBody(context);
-  }
+    return RefreshIndicator(
+        child: _buildBody(context), onRefresh: _refreshData);
 
-  void fetchPosts() async {
-    setState(() {
-      data = initialData;
-      reload = true;
-    });
-  }
-
-  Future<void> _getData() async {
-    setState(() {
-      fetchPosts();
-    });
+    // return Text('hi');
   }
 
   Widget _buildBody(BuildContext context) {
-    if (reload) {
-      setState(() {
-        reload = false;
-      });
-      return CircularProgressIndicator();
-    } else {
-      return FutureBuilder<QuerySnapshot>(
-          future: data,
-          builder: (context, snapshot) {
-            return !snapshot.hasData
-                ? LinearProgressIndicator()
-                : _buildList(context, snapshot.data.docs);
-          });
-    }
+    return StreamBuilder<QuerySnapshot>(
+        stream: data,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.active) {
+            print('refresh');
+            return LinearProgressIndicator();
+          } else {
+            return _buildList(context, snapshot.data.docs);
+          }
+        });
   }
 
   Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
-    return RefreshIndicator(
-        child: ListView(
-          shrinkWrap: true,
-          children: snapshot.map((data) => PostWidget(snapshot: data)).toList(),
-        ),
-        onRefresh: _getData);
+    return ListView(
+      shrinkWrap: true,
+      children: snapshot.map((data) => PostWidget(snapshot: data)).toList(),
+    );
   }
 }
 
@@ -67,13 +76,10 @@ class PostWidget extends StatefulWidget {
 
   final DocumentSnapshot snapshot;
   @override
-  _PostWidgetState createState() => _PostWidgetState(snapshot: snapshot);
+  _PostWidgetState createState() => _PostWidgetState();
 }
 
 class _PostWidgetState extends State<PostWidget> {
-  _PostWidgetState({this.snapshot});
-
-  final DocumentSnapshot snapshot;
   Profile profile;
   bool liked = false;
 
@@ -98,7 +104,7 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final post = Post.fromSnapshot(snapshot);
+    final post = Post.fromSnapshot(widget.snapshot);
     _getProfile(post.uid);
     return Padding(
       key: ValueKey(post.reference),

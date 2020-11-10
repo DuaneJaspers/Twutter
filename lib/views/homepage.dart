@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:twutter/helpers/enum.dart';
-import 'package:twutter/widgets/twuutList.dart';
 
+import '../helpers/enum.dart';
+import '../widgets/twuutList.dart';
 import '../widgets/buttons/login_button.dart';
 import '../widgets/buttons/logout_button.dart';
 import '../widgets/buttons/new_post_fab.dart';
@@ -23,7 +23,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget _changeTab(context, index) {
     navTabsEnum tab = navTabsEnum.values[index];
-    // print(navTabsEnum.following);/
     switch (tab) {
       case navTabsEnum.homepage:
         return TwuutList();
@@ -56,7 +55,6 @@ class _HomePageState extends State<HomePage> {
           DrawerHeader(
             child: GestureDetector(
               onTap: () {
-                print('hit');
                 Navigator.pushNamed(context, '/profile',
                     arguments: FirebaseAuth.instance.currentUser.uid);
               },
@@ -69,19 +67,21 @@ class _HomePageState extends State<HomePage> {
             ),
             decoration: BoxDecoration(color: Colors.blue),
           ),
-          (FirebaseAuth.instance.currentUser != null)
-              ? LogoutButton()
+          (_user != null)
+              ? Column(children: [
+                  LogoutButton(),
+                  RaisedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/profile',
+                          arguments: FirebaseAuth.instance.currentUser.uid);
+                    },
+                    child: Text('Profile'),
+                  )
+                ])
               : Row(
                   children: [LoginButton(), RegisterButton()],
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                 ),
-          RaisedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile',
-                  arguments: FirebaseAuth.instance.currentUser.uid);
-            },
-            child: Text('Profile'),
-          )
         ]),
       ),
       appBar: AppBar(

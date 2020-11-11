@@ -13,9 +13,11 @@ class LoginButton extends StatelessWidget {
 
   void _navigateThenDisplayMessage(BuildContext context) async {
     final result = await Navigator.pushNamed(context, '/login');
-    Scaffold.of(context)
-      ..removeCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text("$result")));
-    Navigator.of(context).pop();
+    if (result != null) {
+      Scaffold.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text("$result")));
+    }
+    if (Scaffold.of(context).isDrawerOpen) Navigator.of(context).pop();
   }
 }

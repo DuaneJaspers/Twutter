@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:twutter/models/post.dart';
 import 'package:twutter/models/profile.dart';
 
@@ -21,8 +22,8 @@ class API {
     return posts
         .add({
           'content': post.content,
-          'tags': post.tags,
-          'likes': post.likes,
+          'tags': post.tags ?? [],
+          'likes': post.likes ?? [],
           'date': post.date,
           'uid': post.uid,
         })
@@ -32,7 +33,7 @@ class API {
 
   static Future<void> changePost(Post post) {
     return posts
-        .doc(post.reference.toString())
+        .doc(post.reference.id.toString())
         .set({
           'content': post.content,
           'tags': post.tags,
@@ -44,15 +45,41 @@ class API {
         .catchError((error) => print("Failed to add user: $error"));
   }
 
+  static Future<void> togglePostLike(Post post, String uid) {
+    List<dynamic> likes = post.likes ?? [];
+    print(post.reference.id);
+    likes.contains(uid) ? likes.remove(uid) : likes.add(uid);
+    return posts
+        .doc(post.reference.id)
+        .update({
+          'likes': likes,
+        })
+        .then((value) => print("changed"))
+        .catchError((error) => print("Failed to add user: $error"));
+  }
+
   static Future<void> saveProfile(Profile profile) {
     return profiles
         .doc(profile.reference ?? profile.uid)
         .set({
           'displayName': profile.displayName,
           'photoUrl': profile.photoUrl,
-          'following': profile.following,
+          'following': profile.following ?? [],
         })
         .then((value) => (print('user added')))
         .catchError((onError) => print('something failed $onError'));
+  }
+
+  static Future<void> toggleFollowing(String uid, Profile profile) {
+    List<dynamic> following = profile.following ?? [];
+    following.contains(uid) ? following.remove(uid) : following.add(uid);
+    print(profile.reference.id);
+    return profiles
+        .doc(profile.reference.id)
+        .update({
+          'following': following,
+        })
+        .then((value) => print("changed"))
+        .catchError((error) => print("Failed to add user: $error"));
   }
 }

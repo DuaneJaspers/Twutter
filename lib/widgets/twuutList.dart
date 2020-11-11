@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twutter/API.dart';
 import 'package:twutter/models/post.dart';
@@ -55,7 +56,6 @@ class _TwuutListState extends State<TwuutList> {
         stream: data,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.active) {
-            print('refresh');
             return LinearProgressIndicator();
           } else {
             return _buildList(context, snapshot.data.docs);
@@ -81,22 +81,55 @@ class PostWidget extends StatefulWidget {
 
 class _PostWidgetState extends State<PostWidget> {
   Profile profile;
-  bool liked = false;
+  bool liked;
+  User user;
+  Post post;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    post = Post.fromSnapshot(widget.snapshot);
+    _getProfile(post.uid);
+    liked = (user != null && post.likes != null)
+        ? post.likes.contains(user.uid)
+        : false;
+    FirebaseAuth.instance.authStateChanges().listen((User firebaseUser) {
+      if (!mounted) return;
+      user = firebaseUser;
+      liked = (user != null && post.likes != null)
+          ? post.likes.contains(user.uid)
+          : false;
+    });
+
+    // print('liked: ${post.content} $liked $user');
+  }
 
   void _getProfile(uid) async {
     var docSnapshot =
         await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
 
     Profile profileData = Profile.fromSnapshot(docSnapshot);
-    if (mounted) {
-      setState(() {
-        profile = profileData;
-      });
-    }
+    setState(() {
+      profile = profileData;
+    });
   }
 
   void _toggleLiked() async {
-    // TODO change db entry
+    if (user == null) {
+      var result = await Navigator.pushNamed(context, '/login');
+      if (result == null) {
+        return;
+      }
+      setState(() {
+        user = FirebaseAuth.instance.currentUser;
+      });
+    }
+    if (post.uid == user.uid) {
+      // user cannot like own post
+      return;
+    }
+    await API.togglePostLike(post, user.uid);
     setState(() {
       liked = !liked;
     });
@@ -104,8 +137,6 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final post = Post.fromSnapshot(widget.snapshot);
-    _getProfile(post.uid);
     return Padding(
       key: ValueKey(post.reference),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -116,17 +147,29 @@ class _PostWidgetState extends State<PostWidget> {
         ),
         child: Column(children: [
           (profile != null
-              ? Text(profile.displayName)
+              ? GestureDetector(
+                  child: Text(
+                    profile.displayName,
+                    textScaleFactor: 1.2,
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/profile',
+                        arguments: post.uid);
+                  },
+                )
               : CircularProgressIndicator()),
           Text(post.content),
           Text(post.date.toDate().toString()),
-          IconButton(
-            icon: Icon(Icons.thumb_up),
-            color: liked ? Colors.red[300] : Colors.black,
-            onPressed: () {
-              _toggleLiked();
-            },
-          )
+          Row(children: [
+            Text(post.likes != null ? post.likes.length.toString() : '0'),
+            IconButton(
+              icon: Icon(Icons.thumb_up),
+              color: liked ? Colors.red[300] : Colors.black,
+              onPressed: () {
+                _toggleLiked();
+              },
+            ),
+          ]),
         ]),
       ),
     );

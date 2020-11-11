@@ -4,7 +4,7 @@ class Profile {
   String displayName;
   String photoUrl;
   DocumentReference reference;
-  List<String> following;
+  List<dynamic> following;
   String uid;
 
   Profile(name, photo, followingList, refUid, {this.reference})
@@ -14,7 +14,7 @@ class Profile {
         following = followingList,
         uid = refUid;
 
-  Profile.fromMap(Map<dynamic, dynamic> map, {this.reference})
+  Profile.fromMap(Map<String, dynamic> map, {this.reference})
       : assert(map['displayName'] != null),
         displayName = map['displayName'],
         photoUrl = map['photoUrl'],
@@ -24,4 +24,9 @@ class Profile {
 
   Profile.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data(), reference: snapshot.reference);
+
+  @override
+  String toString() {
+    return ('displayName $displayName following ${following.toString()}');
+  }
 }

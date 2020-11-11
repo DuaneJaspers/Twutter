@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:twutter/API.dart';
+import 'package:twutter/models/profile.dart';
 
 import '../helpers/enum.dart';
 import '../widgets/twuutList.dart';
@@ -10,9 +13,7 @@ import '../widgets/buttons/register_button.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
-
   final String title;
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -20,9 +21,51 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   User _user;
   int _selectedIndex = 0;
+  Profile _profile;
+  Stream profile;
+
+  @override
+  void initState() {
+    super.initState();
+    _user = FirebaseAuth.instance.currentUser;
+    if (_user != null) _setProfileAsync(_user);
+    FirebaseAuth.instance.authStateChanges().listen((User firebaseUser) {
+      if (firebaseUser != null) {
+        _setProfileAsync(firebaseUser);
+        setState(() {
+          _user = firebaseUser;
+        });
+      } else {
+        setState(() {
+          _user = firebaseUser;
+          _profile = null;
+        });
+      }
+    });
+    API.profiles.doc(_user.uid).snapshots().listen((DocumentSnapshot snapshot) {
+      print('Profile changed');
+      print('snapshot $snapshot');
+      // TODO test for not logged in
+      setState(() {
+        _profile = Profile.fromSnapshot(snapshot);
+      });
+    });
+  }
+
+  void _setProfileAsync(User user) async {
+    print('getting profile');
+    Profile profile =
+        Profile.fromSnapshot(await API.profiles.doc(user.uid).get());
+    setState(() {
+      _profile = profile;
+    });
+  }
 
   Widget _changeTab(context, index) {
     navTabsEnum tab = navTabsEnum.values[index];
+    var test = () {
+      _setProfileAsync(_user);
+    };
     switch (tab) {
       case navTabsEnum.homepage:
         return TwuutList();
@@ -36,7 +79,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
-    print(index);
     setState(() {
       _selectedIndex = index;
     });
@@ -44,11 +86,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAuth.instance.authStateChanges().listen((User user) {
-      setState(() {
-        _user = user;
-      });
-    });
     return Scaffold(
       drawer: Drawer(
         child: ListView(padding: EdgeInsets.zero, children: <Widget>[
@@ -107,6 +144,22 @@ class _HomePageState extends State<HomePage> {
 
 // TODO: move to own class
   Widget _buildFollowing(BuildContext context) {
-    return (Text('following page'));
+    if (_profile == null)
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text('Please log in to see your following list'),
+          LoginButton(),
+        ],
+      );
+    print(_profile.following);
+    // Scaffold.of(context)
+    return (Column(children: [
+      Text('following'),
+      TwuutList(
+        filters: List<String>.from(_profile.following),
+      )
+    ]));
   }
 }

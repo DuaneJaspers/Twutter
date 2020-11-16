@@ -7,8 +7,10 @@ import 'package:twutter/models/profile.dart';
 import '../API.dart';
 
 class TwuutList extends StatefulWidget {
-  TwuutList({Key key, this.filters}) : super(key: key);
+  TwuutList({Key key, this.filters, this.searchQuery}) : super(key: key);
   final List<String> filters;
+  final String searchQuery;
+
   @override
   _TwuutListState createState() => _TwuutListState();
 }
@@ -16,20 +18,7 @@ class TwuutList extends StatefulWidget {
 class _TwuutListState extends State<TwuutList> {
   Stream<QuerySnapshot> data;
   var initialData;
-
-  @override
-  void initState() {
-    super.initState();
-    var filters = widget.filters ?? [];
-    if (filters.isEmpty) {
-      initialData = API.posts.orderBy('date', descending: true);
-    } else {
-      initialData = API.posts
-          .where('uid', whereIn: filters)
-          .orderBy('date', descending: true);
-    }
-    data = initialData.snapshots();
-  }
+  // String searchQuery;
 
   void _fetchPosts() {
     setState(() {
@@ -45,6 +34,25 @@ class _TwuutListState extends State<TwuutList> {
 
   @override
   Widget build(BuildContext context) {
+    String searchQuery = widget.searchQuery;
+    var filters = widget.filters ?? [];
+    if (filters.isEmpty && searchQuery == null) {
+      initialData = API.posts.orderBy('date', descending: true);
+    } else if (filters.isNotEmpty && searchQuery == null) {
+      initialData = API.posts
+          .where('uid', whereIn: filters)
+          .orderBy('date', descending: true);
+    } else if (filters.isEmpty && searchQuery != null) {
+      initialData = API.posts
+          .orderBy('date', descending: true)
+          .where('tags', arrayContains: searchQuery);
+    } else {
+      initialData = API.posts
+          .where('content', arrayContains: searchQuery)
+          .where('uid', whereIn: filters)
+          .orderBy('date', descending: true);
+    }
+    data = initialData.snapshots();
     return RefreshIndicator(
         child: _buildBody(context), onRefresh: _refreshData);
 
@@ -94,15 +102,19 @@ class _PostWidgetState extends State<PostWidget> {
     liked = (user != null && post.likes != null)
         ? post.likes.contains(user.uid)
         : false;
+
     FirebaseAuth.instance.authStateChanges().listen((User firebaseUser) {
-      if (!mounted) return;
+      if (mounted) return;
       user = firebaseUser;
       liked = (user != null && post.likes != null)
           ? post.likes.contains(user.uid)
           : false;
     });
+  }
 
-    // print('liked: ${post.content} $liked $user');
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void _getProfile(uid) async {
@@ -110,9 +122,11 @@ class _PostWidgetState extends State<PostWidget> {
         await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
 
     Profile profileData = Profile.fromSnapshot(docSnapshot);
-    setState(() {
-      profile = profileData;
-    });
+    if (mounted) {
+      setState(() {
+        profile = profileData;
+      });
+    }
   }
 
   void _toggleLiked() async {
@@ -130,9 +144,11 @@ class _PostWidgetState extends State<PostWidget> {
       return;
     }
     await API.togglePostLike(post, user.uid);
-    setState(() {
-      liked = !liked;
-    });
+    if (mounted) {
+      setState(() {
+        liked = !liked;
+      });
+    }
   }
 
   @override

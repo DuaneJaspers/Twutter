@@ -23,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   Profile _profile;
   Stream profile;
+  String title = "homepage";
 
   @override
   void initState() {
@@ -32,9 +33,6 @@ class _HomePageState extends State<HomePage> {
     FirebaseAuth.instance.authStateChanges().listen((User firebaseUser) {
       if (firebaseUser != null) {
         _setProfileAsync(firebaseUser);
-        setState(() {
-          _user = firebaseUser;
-        });
       } else {
         setState(() {
           _user = firebaseUser;
@@ -42,44 +40,36 @@ class _HomePageState extends State<HomePage> {
         });
       }
     });
-    API.profiles.doc(_user.uid).snapshots().listen((DocumentSnapshot snapshot) {
-      print('Profile changed');
-      print('snapshot $snapshot');
-      // TODO test for not logged in
-      setState(() {
-        _profile = Profile.fromSnapshot(snapshot);
-      });
-    });
   }
 
   void _setProfileAsync(User user) async {
-    print('getting profile');
-    Profile profile =
-        Profile.fromSnapshot(await API.profiles.doc(user.uid).get());
-    setState(() {
-      _profile = profile;
+    API.profiles.doc(user.uid).snapshots().listen((DocumentSnapshot snapshot) {
+      print('Profile changed');
+      print('snapshot $snapshot');
+      setState(() {
+        _profile = Profile.fromSnapshot(snapshot);
+        _user = user;
+      });
     });
   }
 
   Widget _changeTab(context, index) {
     navTabsEnum tab = navTabsEnum.values[index];
-    var test = () {
-      _setProfileAsync(_user);
-    };
     switch (tab) {
       case navTabsEnum.homepage:
-        return TwuutList();
+        return TwuutList(key: Key('homepage'));
         break;
       case navTabsEnum.following:
         return _buildFollowing(context);
         break;
       default:
-        return TwuutList();
+        return TwuutList(key: Key('homepage'));
     }
   }
 
   void _onItemTapped(int index) {
     setState(() {
+      title = index == 0 ? 'homepage' : 'following';
       _selectedIndex = index;
     });
   }
@@ -97,7 +87,7 @@ class _HomePageState extends State<HomePage> {
               },
               child: Column(children: <Widget>[
                 Text(
-                  _user != null ? '@${_user.displayName}' : '',
+                  _profile != null ? '@${_profile.displayName}' : '',
                   textAlign: TextAlign.center,
                 ),
               ]),
@@ -122,8 +112,15 @@ class _HomePageState extends State<HomePage> {
         ]),
       ),
       appBar: AppBar(
-        title: Text(widget.title),
-        actions: [],
+        title: Text('${widget.title}  $title'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/search');
+            },
+            icon: Icon(Icons.search),
+          )
+        ],
       ),
       body: _changeTab(context, _selectedIndex),
       floatingActionButton: NewPostFAB(),
@@ -144,22 +141,45 @@ class _HomePageState extends State<HomePage> {
 
 // TODO: move to own class
   Widget _buildFollowing(BuildContext context) {
+    setState(() {
+      title = 'following';
+    });
     if (_profile == null)
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text('Please log in to see your following list'),
-          LoginButton(),
-        ],
-      );
+      return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            // mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Please log in to see your following list',
+                textAlign: TextAlign.center,
+              ),
+              LoginButton(),
+            ],
+          ));
+
+    if (_profile.following.isEmpty) {
+      return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            // mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "You're not following anyone yet...",
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ));
+    }
     print(_profile.following);
-    // Scaffold.of(context)
-    return (Column(children: [
-      Text('following'),
-      TwuutList(
-        filters: List<String>.from(_profile.following),
-      )
-    ]));
+    return TwuutList(
+      key: Key('following'),
+      filters: List<String>.from(_profile.following),
+    );
+    // return
   }
 }

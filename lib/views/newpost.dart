@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:twutter/helpers/util.dart';
+import '../helpers/util.dart';
 import '../models/post.dart';
 import '../API.dart';
 
@@ -14,6 +14,9 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _postController = TextEditingController();
+
   int _counter = 0;
   String postContent;
   User user = FirebaseAuth.instance.currentUser;
@@ -39,30 +42,49 @@ class _PostPageState extends State<PostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("New Post"),
+          title: Text(widget.title),
           actions: <Widget>[
             Padding(
                 padding: EdgeInsets.only(right: 20),
                 child:
                     // TODO: style button
                     RaisedButton(
-                        onPressed: _savePost, child: Text('Make Twut')))
+                        onPressed: () async {
+                          if (_formKey.currentState.validate()) {
+                            _savePost();
+                          }
+                        },
+                        child: Text('Make Twut')))
           ],
         ),
-        body: Column(
-          children: <Widget>[
-            // TODO : display name and profile picture
-            Text('$_counter = $postContent'),
-            // TODO: move to top
-            // TODO: add _counter limit
-            TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                autocorrect: true,
-                decoration: InputDecoration(
-                    labelText: 'Post', alignLabelWithHint: false),
-                onChanged: (String value) => _changePost(value)),
-          ],
-        ));
+        body: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                // TODO : display name and profile picture
+                Text('${150 - _counter}',
+                    style: (150 - _counter < 0)
+                        ? TextStyle(color: Colors.red)
+                        : null),
+                // TODO: move to top
+                // TODO: add _counter limit
+                TextFormField(
+                    controller: _postController,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    autocorrect: true,
+                    validator: (String value) {
+                      if (value.isEmpty) {
+                        return 'Cannot make an empty post...';
+                      }
+                      if (value.length > 150) {
+                        return 'Too many characters used...';
+                      }
+                    },
+                    decoration: InputDecoration(
+                        labelText: 'Post', alignLabelWithHint: false),
+                    onChanged: (String value) => _changePost(value)),
+              ],
+            )));
   }
 }

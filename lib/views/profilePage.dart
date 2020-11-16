@@ -17,12 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Profile _userProfile;
   bool loading = true;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _getProfileAsync(String uid) async {
+  Future<void> _getProfileAsync(String uid) async {
     if (_uid == FirebaseAuth.instance.currentUser.uid) {
       if (mounted) {
         setState(() {
@@ -36,6 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
     Profile profile = Profile.fromSnapshot(await API.profiles.doc(uid).get());
     Profile userProfile = Profile.fromSnapshot(
         await API.profiles.doc(FirebaseAuth.instance.currentUser.uid).get());
+    print('calls');
     if (mounted) {
       setState(() {
         _userProfile = userProfile;
@@ -43,12 +39,13 @@ class _ProfilePageState extends State<ProfilePage> {
         loading = false;
       });
     }
+    return;
   }
 
   @override
   Widget build(BuildContext context) {
     _uid = ModalRoute.of(context).settings.arguments.toString();
-    _getProfileAsync(_uid);
+    loading ? _getProfileAsync(_uid) : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -56,14 +53,21 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Column(
         children: [
-          (loading
-              ? CircularProgressIndicator()
-              : Column(
-                  children: [
-                    Text('$displayName'),
-                    if (!ownProfile) FollowButton(_uid, _userProfile, _userProfile.following.contains(_uid)),
-                  ],
-                )),
+          Column(
+            children: [
+              Text('$displayName'),
+              if (!ownProfile)
+                _userProfile != null
+                    ? FollowButton(
+                        _uid,
+                        _userProfile,
+                        _userProfile.following.isNotEmpty
+                            ? _userProfile.following.contains(_uid)
+                            : false)
+                    : CircularProgressIndicator(),
+            ],
+          ),
+
           Expanded(
               child: SizedBox(
                   child: TwuutList(

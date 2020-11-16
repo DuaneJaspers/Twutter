@@ -61,7 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
               : Column(
                   children: [
                     Text('$displayName'),
-                    if (!ownProfile) FollowButton(_uid, _userProfile),
+                    if (!ownProfile) FollowButton(_uid, _userProfile, _userProfile.following.contains(_uid)),
                   ],
                 )),
           Expanded(

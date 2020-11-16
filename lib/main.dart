@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:twutter/views/profile.dart';
+import 'package:twutter/views/search.dart';
+
+import 'views/profilePage.dart';
 import 'views/login.dart';
-import 'package:twutter/views/register.dart';
+import 'views/register.dart';
 import 'views/newpost.dart';
 import 'views/homepage.dart';
 
@@ -28,11 +30,12 @@ class _TwutterAppState extends State<TwutterApp> {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(title: "Twutter Homepage"),
-        '/post': (context) => PostPage(title: "new record"),
+        '/': (context) => HomePage(title: "Twutter"),
+        '/post': (context) => PostPage(title: "New post"),
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/profile': (context) => ProfilePage(),
+        '/search': (context) => SearchPage(),
         // TODO : forgot password
       },
     );
